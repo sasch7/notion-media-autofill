@@ -2,6 +2,7 @@ from flask import Flask, request
 import os  
 import logging  
 import utils
+import notion_client
 
 app = Flask(__name__)
 
@@ -16,11 +17,15 @@ def home():
 def handle_webhook():
     data = request.json
     logger.info(f"Data received: {data}")
-
+    # Get media type
     db_id = data.get("data", {}).get("parent", {}).get("id")
     media_type = utils.get_media_type(db_id)
-
     logger.info(f"Tipo di media: {media_type}")
+
+    # Get page info
+    page_id = data.get("entity", {}).get("id")
+    page_data = notion_client.get_page_data(page_id)
+    logger.info(f"Page data: {page_data}")
     
     return '', 200
 
