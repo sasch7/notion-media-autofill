@@ -11,7 +11,7 @@ def home():
 def handle_webhook():
     data = request.json
     print("Ricevuto:", data)
-    return '', 200
+    return data, 200
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
