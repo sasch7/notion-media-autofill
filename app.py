@@ -1,9 +1,9 @@
 from flask import Flask, request
-import requests  
 import os  
 import logging  
 import utils
 import notion_client
+import movies
 
 app = Flask(__name__)
 
@@ -27,7 +27,10 @@ def handle_webhook():
     page_id = data.get("entity", {}).get("id")
     page_data = notion_client.get_page_data(page_id)
     logger.info(f"Page data: {page_data}")
-    
+
+    # Test MPDB
+    test = movies.fetch_movie_cover("tt2294629")
+    print
     return '', 200
 
 # Blocco che viene eseguito quando l'app viene avviata
