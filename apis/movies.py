@@ -12,8 +12,9 @@ def get_movie_images(imdb_id):
         "Authorization": f"Bearer {config.TMDB_TOKEN}"
     }
     res = requests.get(url, headers=headers)
-    backdrop_path = res['movie_results'][0].get('backdrop_path')
-    poster_path = res['movie_results'][0].get('poster_path')
+    data = res.json() 
+    backdrop_path = data['movie_results'][0].get('backdrop_path')
+    poster_path = data['movie_results'][0].get('poster_path')
 
     backdrop_url = f"https://image.tmdb.org/t/p/w1280/{backdrop_path}"
     poster_url = f"https://image.tmdb.org/t/p/w1280/{poster_path}"
