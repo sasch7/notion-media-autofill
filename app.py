@@ -33,6 +33,9 @@ def handle_webhook():
 
     # Get movie images
 
+    # Return (non togliere)
+    return '', 200
+
 # Blocco che viene eseguito quando l'app viene avviata
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
