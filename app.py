@@ -28,7 +28,7 @@ def handle_webhook():
 
     # Test MPDB
     test = movies.fetch_movie_cover("tt2294629")
-    print
+    logger.info(f"MoviePosterDB response: {test}")
     return '', 200
 
 # Blocco che viene eseguito quando l'app viene avviata
