@@ -24,12 +24,14 @@ def handle_webhook():
     # Get page info
     page_id = data.get("entity", {}).get("id")
     page_data = notion_client.get_page_data(page_id)
-    logger.info(f"Page data: {page_data}")
+    title = page_data['properties']['Title']['title'][0]['plain_text']
+    logger.info(f"Title: {title}")
 
-    # Test MPDB
-    test = movies.fetch_movie_cover("tt2294629")
-    logger.info(f"MoviePosterDB response: {test}")
-    return '', 200
+    # Get movie data
+    movie_data = movies.fetch_movie_data(title)
+    logger.info(f"Movie data: {movie_data}")
+
+    # Get movie images
 
 # Blocco che viene eseguito quando l'app viene avviata
 if __name__ == '__main__':

@@ -1,32 +1,20 @@
 import requests
 import config
-import cloudscraper
-import logging
 
-logger = logging.getLogger(__name__)
-
-def fetch_movie_data(title):
+def get_movie_data(title):
     url = f"http://www.omdbapi.com/?t={title}&apikey={config.OMDB_API_KEY}"
     res = requests.get(url)
     return res.json()
 
-def fetch_movie_cover(IMDb_id):
-    scraper = cloudscraper.create_scraper()
-    url = f"https://api.movieposterdb.com/v1/posters?poster_type_id=2&min_width=1500&min_height=600&imdb={IMDb_id}"
+def get_movie_cover(imdb_id):
+    url = f"https://api.themoviedb.org/3/find/{imdb_id}?external_source=imdb_id"
     headers = {
-        "Authorization": f"Bearer {config.MPDB_TOKEN}",
-        "Accept": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "Authorization": f"Bearer {config.TMDB_TOKEN}"
     }
+    res = requests.get(url, headers=headers)
+    backdrop_path = res['movie_results'][0].get('backdrop_path')
+    poster_path = res['movie_results'][0].get('poster_path')
 
-    try:
-        res = scraper.get(url, headers=headers)
-        logger.info(f"HTTP status: {res.status_code}")
-        logger.info(f"Raw response: {res.text}")
-        res.raise_for_status()
-        data = res.json()
-        logger.info(f"Parsed JSON: {data}")
-        return data
-    except Exception as e:
-        logger.error(f"Errore durante la richiesta a MoviePosterDB: {e}")
-        return None
+    backdrop_url = f"https://image.tmdb.org/t/p/w1280/{backdrop_path}"
+    poster_url = f"https://image.tmdb.org/t/p/w1280/{poster_path}"
+    return backdrop_url, poster_url

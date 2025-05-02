@@ -11,5 +11,5 @@ GAMES_DATABASE_ID = "1e617bcc-3d9c-816b-938f-e26b067a3d76"
 # OMDB
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 
-#MPDB
-MPDB_TOKEN = os.getenv("MPDB_TOKEN")
+#TMDB
+TMDB_TOKEN = os.getenv("TMDB_TOKEN")
