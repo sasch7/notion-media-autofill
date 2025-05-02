@@ -1,9 +1,7 @@
 from flask import Flask, request
-import os  
-import logging  
-import utils
-import notion_client
-import movies
+import os, logging  
+import utils, notion_client
+import apis.movies as movies
 
 app = Flask(__name__)
 
