@@ -27,14 +27,21 @@ def handle_webhook():
     title = page_data['properties']['Title']['title'][0]['plain_text']
     logger.info(f"Title: {title}")
 
-    # Get movie data
-    movie_data = movies.get_movie_data(title)
-    logger.info(f"Movie data: {movie_data}")
-
-    # Get movie images
-    imdb_id = movie_data['imdbID']
-    backdrop_url, poster_url = movies.get_movie_images(imdb_id)
-    logger.info(f"Backdrop URL: {backdrop_url}, Poster URL: {poster_url}")
+    # Media type handling
+    if media_type == "movie":
+        movie_data = movies.get_movie_data(title)
+        imdb_id = movie_data['imdbID']
+        backdrop_url, poster_url = movies.get_movie_images(imdb_id)
+        data = movies.set_update_movie_page(movie_data, backdrop_url, poster_url)
+        notion_client.update_page(page_id, data)
+    elif media_type == "tvseries":
+        pass  # Qui aggiungerai la logica per le serie TV
+    elif media_type == "book":
+        pass  # Qui aggiungerai la logica per i libri
+    elif media_type == "game":
+        pass  # Qui aggiungerai la logica per i giochi
+    elif media_type == "unknown":
+        pass  
 
     # Return (non togliere)
     return '', 200
