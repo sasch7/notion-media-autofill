@@ -28,7 +28,7 @@ def handle_webhook():
     logger.info(f"Title: {title}")
 
     # Get movie data
-    movie_data = movies.fetch_movie_data(title)
+    movie_data = movies.get_movie_data(title)
     logger.info(f"Movie data: {movie_data}")
 
     # Get movie images
