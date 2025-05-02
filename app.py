@@ -32,6 +32,9 @@ def handle_webhook():
     logger.info(f"Movie data: {movie_data}")
 
     # Get movie images
+    imdb_id = movie_data['imdbID']
+    backdrop_url, poster_url = movies.get_movie_images(imdb_id)
+    logger.info(f"Backdrop URL: {backdrop_url}, Poster URL: {poster_url}")
 
     # Return (non togliere)
     return '', 200

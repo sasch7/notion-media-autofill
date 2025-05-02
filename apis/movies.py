@@ -6,7 +6,7 @@ def get_movie_data(title):
     res = requests.get(url)
     return res.json()
 
-def get_movie_cover(imdb_id):
+def get_movie_images(imdb_id):
     url = f"https://api.themoviedb.org/3/find/{imdb_id}?external_source=imdb_id"
     headers = {
         "Authorization": f"Bearer {config.TMDB_TOKEN}"
