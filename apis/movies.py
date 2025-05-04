@@ -12,6 +12,11 @@ def get_movie_data(title, year=None, author=None):
     res = requests.get(url)
     data = res.json()
 
+    # Se OMDb non trova nulla, esci subito
+    if data.get('Response') == 'False':
+        logger.warning(f"OMDb did not find the movie: {title}")
+        return None
+    
     # Filtro per autore se specificato
     if author and data.get('Director'):
         directors = [d.strip().lower() for d in data['Director'].split(',')]
