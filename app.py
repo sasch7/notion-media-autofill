@@ -25,42 +25,49 @@ def handle_webhook():
 
     page_id = data.get("entity", {}).get("id")
     page_data = notion_client.get_page_data(page_id)
-    title_raw = page_data.get('properties', {}).get('Title', {}).get('title', [{}])[0].get('plain_text', '')
+    title_raw = page_data['properties']['Title']['title'][0]['plain_text']
     title, year, author = utils.parse_title(title_raw)
-    logger.info(f"Parsed Title: {title}, Year: {year}, Author: {author}")
+    logger.info(f"Title: {title}")
 
-    if media_type == "movie":
-        movie = movies.search_movie_tmdb(title, year, author)
-        if movie:
-            backdrop_url, poster_url = movies.get_movie_images_tmdb(movie['id'])
-            data = movies.set_update_movie_page(movie, backdrop_url, poster_url)
-            notion_client.update_page(page_id, data)
-        else:
-            notion_client.set_page_title_not_found(page_id, title)
+    try:
+        if media_type == "movie":
+            movie_details = movies.search_movie_tmdb(title, year, author)
+            if movie_details:
+                data = movies.set_update_movie_page(movie_details)
+                notion_client.update_page(page_id, data)
+            else:
+                notion_client.set_page_title_not_found(page_id, title)
 
-    elif media_type == "tvseries":
-        tvseries_data = tvseries.get_tvseries_data(title)
-        if not tvseries_data or tvseries_data.get("Response") == "False":
-            notion_client.set_page_title_not_found(page_id, title)
-        else:
-            logger.info(f"{media_type} processing not implemented yet")
+        elif media_type == "tvseries":
+            tvseries_data = tvseries.get_tvseries_data(title)
+            if not tvseries_data or tvseries_data.get("Response") == "False":
+                notion_client.set_page_title_not_found(page_id, title)
+            else:
+                logger.info(f"{media_type} processing not implemented yet")
+                pass
 
-    elif media_type == "book":
-        book_data = books.get_books_data(title)
-        if not book_data or book_data.get("Response") == "False":
-            notion_client.set_page_title_not_found(page_id, title)
-        else:
-            logger.info(f"{media_type} processing not implemented yet")
+        elif media_type == "book":
+            book_data = books.get_books_data(title)
+            if not book_data or book_data.get("Response") == "False":
+                notion_client.set_page_title_not_found(page_id, title)
+            else:
+                logger.info(f"{media_type} processing not implemented yet")
+                pass
 
-    elif media_type == "game":
-        game_data = games.get_game_data(title)
-        if not game_data or game_data.get("Response") == "False":
-            notion_client.set_page_title_not_found(page_id, title)
-        else:
-            logger.info(f"{media_type} processing not implemented yet")
+        elif media_type == "game":
+            game_data = games.get_game_data(title)
+            if not game_data or game_data.get("Response") == "False":
+                notion_client.set_page_title_not_found(page_id, title)
+            else:
+                logger.info(f"{media_type} processing not implemented yet")
+                pass
 
-    elif media_type == "unknown":
-        logger.info("Media type unknown, skipping...")
+        elif media_type == "unknown":
+            logger.info("Unknown media type, no action taken.")
+
+    except Exception as e:
+        logger.error(f"Error processing {media_type}: {str(e)}")
+        notion_client.set_page_title_not_found(page_id, f"{title} (error)")
 
     return '', 200
 
