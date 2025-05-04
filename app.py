@@ -2,6 +2,9 @@ from flask import Flask, request
 import os, logging  
 import utils, notion_client
 import apis.movies as movies
+import apis.tvseries as tvseries
+import apis.games as games
+import apis.books as books
 
 app = Flask(__name__)
 
@@ -25,21 +28,40 @@ def handle_webhook():
     page_id = data.get("entity", {}).get("id")
     page_data = notion_client.get_page_data(page_id)
     title = page_data['properties']['Title']['title'][0]['plain_text']
+    main_title, year, author = utils.parse_title_params(title)
     logger.info(f"Title: {title}")
 
     # Media type handling
     if media_type == "movie":
-        movie_data = movies.get_movie_data(title)
-        imdb_id = movie_data['imdbID']
-        backdrop_url, poster_url = movies.get_movie_images(imdb_id)
-        data = movies.set_update_movie_page(movie_data, backdrop_url, poster_url)
-        notion_client.update_page(page_id, data)
+        movie_data = movies.get_movie_data(main_title, year, author)
+        if not movie_data or movie_data.get("Response") == "False":
+            notion_client.set_page_title_not_found(page_id, title)
+        else:
+            imdb_id = movie_data['imdbID']
+            backdrop_url, poster_url = movies.get_movie_images(imdb_id)
+            data = movies.set_update_movie_page(movie_data, backdrop_url, poster_url)
+            notion_client.update_page(page_id, data)
     elif media_type == "tvseries":
-        pass  # Qui aggiungerai la logica per le serie TV
+        tvseries_data = tvseries.get_tvseries_data(title)
+        if not tvseries_data or tvseries_data.get("Response") == "False":
+            notion_client.set_page_title_not_found(page_id, title)
+        else:
+            logger.info(f"{media_type} processing not implemented yet")
+            pass  # Qui aggiungerai la logica per le serie TV
     elif media_type == "book":
-        pass  # Qui aggiungerai la logica per i libri
+        book_data = books.get_books_data(title)
+        if not book_data or book_data.get("Response") == "False":
+            notion_client.set_page_title_not_found(page_id, title)
+        else:
+            logger.info(f"{media_type} processing not implemented yet")
+            pass  # Qui aggiungerai la logica per i libri
     elif media_type == "game":
-        pass  # Qui aggiungerai la logica per i giochi
+        game_data = games.get_game_data(title)
+        if not game_data or game_data.get("Response") == "False":
+            notion_client.set_page_title_not_found(page_id, title)
+        else:
+            logger.info(f"{media_type} processing not implemented yet")
+            pass  # Qui aggiungerai la logica per i giochi
     elif media_type == "unknown":
         pass  
 
