@@ -59,24 +59,25 @@ def get_movie_details_tmdb(tmdb_id):
 
     return details
 
-def set_update_movie_page(movie_data, backdrop_url, poster_url):
-    backdrop_url = backdrop_url or movie_data.get('backdrop_url')
-    poster_url = poster_url or movie_data.get('poster_url')
+def set_update_movie_page(movie_data):
+    backdrop_path = movie_data.get('backdrop_path')
+    poster_path = movie_data.get('poster_path')
+    backdrop_url = f"https://image.tmdb.org/t/p/w1280{backdrop_path}" if backdrop_path else None
+    poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
 
     country = movie_data['production_countries'][0]['name'] if movie_data.get('production_countries') else 'N/A'
     production = ', '.join([c['name'] for c in movie_data.get('production_companies', [])]) or 'N/A'
     runtime = movie_data.get('runtime')
     language = movie_data['spoken_languages'][0]['name'] if movie_data.get('spoken_languages') else 'N/A'
     imdb_id = movie_data.get('imdb_id', '')
-    cast_list = movie_data.get('credits', {}).get('cast', [])
-    cast = ', '.join([c['name'] for c in cast_list[:3]]) if cast_list else ''
-    release_date = movie_data.get('release_date')
+    cast = ', '.join([c['name'] for c in movie_data['credits']['cast'][:3]]) if movie_data.get('credits') else ''
+    release_date = movie_data.get('release_date', None)
     synopsis = movie_data.get('overview', '')
-    directors = ', '.join([c['name'] for c in movie_data.get('credits', {}).get('crew', []) if c['job'] == 'Director'])
+    directors = ', '.join([c['name'] for c in movie_data['credits']['crew'] if c['job'] == 'Director']) if movie_data.get('credits') else ''
     year = release_date.split('-')[0] if release_date else ''
     imdb_rating = str(movie_data.get('vote_average', ''))
     genres = [{"name": g['name']} for g in movie_data.get('genres', [])]
-    writers = ', '.join([c['name'] for c in movie_data.get('credits', {}).get('crew', []) if c['job'] in ['Writer', 'Screenplay']])
+    writers = ', '.join([c['name'] for c in movie_data['credits']['crew'] if c['job'] in ['Writer', 'Screenplay']]) if movie_data.get('credits') else ''
     title = movie_data.get('title', '')
     imdb_page = f"https://www.imdb.com/title/{imdb_id}" if imdb_id else ''
 
@@ -88,12 +89,12 @@ def set_update_movie_page(movie_data, backdrop_url, poster_url):
             "Language": {"select": {"name": language}},
             "IMDb ID": {"rich_text": [{"type": "text", "text": {"content": imdb_id}}]},
             "Cast": {"rich_text": [{"type": "text", "text": {"content": cast}}]},
-            "Release Date": {"date": {"start": release_date}} if release_date else None,
-            "Poster": {"files": [{"name": "Poster", "external": {"url": poster_url}}]} if poster_url else None,
+            "Release Date": {"date": {"start": release_date}} if release_date else "",
+            "Poster": {"files": [{"name": "Poster", "external": {"url": poster_url}}]} if poster_url else "",
             "Synopsis": {"rich_text": [{"type": "text", "text": {"content": synopsis}}]},
             "Director(s)": {"rich_text": [{"type": "text", "text": {"content": directors}}]},
             "Year": {"rich_text": [{"type": "text", "text": {"content": year}}]},
-            "IMDb Page": {"url": imdb_page} if imdb_page else None,
+            "IMDb Page": {"url": imdb_page},
             "IMDb Rating": {"rich_text": [{"type": "text", "text": {"content": imdb_rating}}]},
             "Genres": {"multi_select": genres},
             "Writer(s)": {"rich_text": [{"type": "text", "text": {"content": writers}}]},
