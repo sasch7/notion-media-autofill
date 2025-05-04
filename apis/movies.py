@@ -26,7 +26,7 @@ def search_movie_tmdb(title, year=None, author=None):
         details = get_movie_details_tmdb(tmdb_id)
         return details
 
-    for result in data['results'][:3]:  # puoi aumentare a [:5] se vuoi
+    for result in data['results'][:3]:
         tmdb_id = result['id']
         details = get_movie_details_tmdb(tmdb_id)
         credits = details.get('credits', {})
@@ -42,15 +42,27 @@ def search_movie_tmdb(title, year=None, author=None):
 
 def get_movie_details_tmdb(tmdb_id):
     url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
-    params = {"append_to_response": "credits"}
+    params = {
+        "append_to_response": "credits"
+    }
     headers = {
         "Authorization": f"Bearer {config.TMDB_TOKEN}"
     }
     res = requests.get(url, params=params, headers=headers)
     res.raise_for_status()
-    return res.json()
+    details = res.json()
+
+    backdrop_path = details.get('backdrop_path')
+    poster_path = details.get('poster_path')
+    details['backdrop_url'] = f"https://image.tmdb.org/t/p/w1280{backdrop_path}" if backdrop_path else None
+    details['poster_url'] = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+
+    return details
 
 def set_update_movie_page(movie_data, backdrop_url, poster_url):
+    backdrop_url = backdrop_url or movie_data.get('backdrop_url')
+    poster_url = poster_url or movie_data.get('poster_url')
+
     country = movie_data['production_countries'][0]['name'] if movie_data.get('production_countries') else 'N/A'
     production = ', '.join([c['name'] for c in movie_data.get('production_companies', [])]) or 'N/A'
     runtime = movie_data.get('runtime')
@@ -68,34 +80,26 @@ def set_update_movie_page(movie_data, backdrop_url, poster_url):
     title = movie_data.get('title', '')
     imdb_page = f"https://www.imdb.com/title/{imdb_id}" if imdb_id else ''
 
-    properties = {
-        "Country": {"select": {"name": country}},
-        "Production": {"rich_text": [{"type": "text", "text": {"content": production}}]},
-        "Runtime (Minutes)": {"number": runtime},
-        "Language": {"select": {"name": language}},
-        "IMDb ID": {"rich_text": [{"type": "text", "text": {"content": imdb_id}}]},
-        "Cast": {"rich_text": [{"type": "text", "text": {"content": cast}}]},
-        "Release Date": {"date": {"start": release_date}} if release_date else None,
-        "Poster": {"files": [{"name": "Poster", "external": {"url": poster_url}}]} if poster_url else None,
-        "Synopsis": {"rich_text": [{"type": "text", "text": {"content": synopsis}}]},
-        "Director(s)": {"rich_text": [{"type": "text", "text": {"content": directors}}]},
-        "Year": {"rich_text": [{"type": "text", "text": {"content": year}}]},
-        "IMDb Page": {"url": imdb_page} if imdb_page else None,
-        "IMDb Rating": {"rich_text": [{"type": "text", "text": {"content": imdb_rating}}]},
-        "Genres": {"multi_select": genres},
-        "Writer(s)": {"rich_text": [{"type": "text", "text": {"content": writers}}]},
-        "Title": {"title": [{"type": "text", "text": {"content": title}}]}
-    }
-
-    # Rimuovi campi None
-    properties_cleaned = {k: v for k, v in properties.items() if v is not None}
-
     data = {
-        "properties": properties_cleaned,
-        "cover": {"type": "external", "external": {"url": backdrop_url}} if backdrop_url else None
+        "properties": {
+            "Country": {"select": {"name": country}},
+            "Production": {"rich_text": [{"type": "text", "text": {"content": production}}]},
+            "Runtime (Minutes)": {"number": runtime},
+            "Language": {"select": {"name": language}},
+            "IMDb ID": {"rich_text": [{"type": "text", "text": {"content": imdb_id}}]},
+            "Cast": {"rich_text": [{"type": "text", "text": {"content": cast}}]},
+            "Release Date": {"date": {"start": release_date}} if release_date else None,
+            "Poster": {"files": [{"name": "Poster", "external": {"url": poster_url}}]} if poster_url else None,
+            "Synopsis": {"rich_text": [{"type": "text", "text": {"content": synopsis}}]},
+            "Director(s)": {"rich_text": [{"type": "text", "text": {"content": directors}}]},
+            "Year": {"rich_text": [{"type": "text", "text": {"content": year}}]},
+            "IMDb Page": {"url": imdb_page} if imdb_page else None,
+            "IMDb Rating": {"rich_text": [{"type": "text", "text": {"content": imdb_rating}}]},
+            "Genres": {"multi_select": genres},
+            "Writer(s)": {"rich_text": [{"type": "text", "text": {"content": writers}}]},
+            "Title": {"title": [{"type": "text", "text": {"content": title}}]}
+        },
+        "cover": {"type": "external", "external": {"url": backdrop_url}} if backdrop_url else ""
     }
 
-    # Rimuovi cover se None
-    data_cleaned = {k: v for k, v in data.items() if v is not None}
-
-    return data_cleaned
+    return data
