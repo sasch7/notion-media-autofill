@@ -12,15 +12,14 @@ def get_media_type(database_id):
     else:
         return "unknown"
 
-def parse_title_params(title):
-    parts = title.split(';')
-    main_title = parts[0].strip()
+def parse_title(title_raw):
+    parts = title_raw.split(";")
+    title = parts[0].strip()
     year = None
     author = None
-
     for part in parts[1:]:
-        if part.startswith('y'):
+        if part.startswith("y"):
             year = part[1:]
-        elif part.startswith('a'):
+        elif part.startswith("a"):
             author = part[1:]
-    return main_title, year, author                        
+    return title, year, author           
