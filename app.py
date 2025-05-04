@@ -26,6 +26,11 @@ def handle_webhook():
     page_id = data.get("entity", {}).get("id")
     page_data = notion_client.get_page_data(page_id)
     title_raw = page_data['properties']['Title']['title'][0]['plain_text']
+    
+    if title_raw.startswith('❌'):
+        logger.info(f"Ignorato titolo marcato come not found: {title_raw}")
+        return '', 200
+    
     title, year, author = utils.parse_title(title_raw)
     logger.info(f"Title: {title}")
 
