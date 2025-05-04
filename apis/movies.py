@@ -23,7 +23,8 @@ def get_movie_data(title, year=None, author=None):
         if not any(author.lower() in d for d in directors):
             logger.warning(f"Director {author} not found in {directors}")
             return None
-        return data
+    
+    return data
 
 def get_movie_images(imdb_id):
     url = f"https://api.themoviedb.org/3/find/{imdb_id}?external_source=imdb_id"
